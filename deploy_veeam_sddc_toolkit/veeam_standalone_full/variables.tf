@@ -124,19 +124,20 @@ variable "proxy_count" {
 variable "veeam_installation_url" {
   type        = "string"
   description = "Full URL from which the Veeam software will be downloaded."
-  default     = "https://download.veeam.com/VeeamBackup&Replication_9.5.0.1922.Update3a.iso"
+  default     = "https://download.veeam.com/VeeamBackup&Replication_9.5.4.2615.Update4.iso"
 }
 
 variable "veeam_installation_checksum" {
   type        = "string"
   description = "SHA256 Checksum for the ISO Url selected."
-  default     = "9a6fa7d857396c058b2e65f20968de56f96bc293e0e8fd9f1a848c7d71534134"
+  default     = "8a594cec74059f9929ea765ac5e70a49da6fc93803b567cbb9d74fbb1a49a6cc"
 }
 
-#variable "license_base64_encoded" {
-#  type        = "string"
-#  description = "Base64 Encoded License File"
-#}
+variable "license_base64_encoded" {
+  type        = "string"
+  description = "Base64 Encoded License File"
+  default     = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPExpY2Vuc2VzPjxMaWNlbnNlPjwhW0NEQVRBW0NQVSBzb2NrZXRzIChIeXBlci1WKT0wCkNQVSBzb2NrZXRzICh2U3BoZXJlKT0xMDAKQ29tcGFueT1WZWVhbSBTb2Z0d2FyZQpEZXNjcmlwdGlvbj1Db3B5cmlnaHQgMjAxOCBWZWVhbSwgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLiBUaGUgU29mdHdhcmUgUHJvZHVjdCBpcyBwcm90ZWN0ZWQgYnkgY29weXJpZ2h0IGFuZCBvdGhlciBpbnRlbGxlY3R1YWwgcHJvcGVydHkgbGF3cyBhbmQgdHJlYXRpZXMuIFZlZWFtIG9yIGl0cyBzdXBwbGllcnMgb3duIHRoZSB0aXRsZSwgY29weXJpZ2h0LCBhbmQgb3RoZXIgaW50ZWxsZWN0dWFsIHByb3BlcnR5IHJpZ2h0cyBpbiB0aGUgU29mdHdhcmUgUHJvZHVjdC4gVmVlYW0gcmVzZXJ2ZXMgYWxsIHJpZ2h0cyBub3QgZXhwcmVzc2x5IGdyYW50ZWQgdG8geW91IGluIEVVTEEuIFRoZSBTb2Z0d2FyZSBQcm9kdWN0IGlzIGxpY2Vuc2VkLCBub3Qgc29sZC4gVmVlYW0gZ3JhbnRzIHRvIHlvdSBhIG5vbmV4Y2x1c2l2ZSBub250cmFuc2ZlcmFibGUgbGljZW5zZSB0byB1c2UgdGhlIFNvZnR3YXJlIFByb2R1Y3QsIHByb3ZpZGVkIHRoYXQgeW91IGFncmVlIHdpdGggRVVMQS4KRS1tYWlsPWFudGhvbnkuc3BpdGVyaUB2ZWVhbS5jb20KRWRpdGlvbj1FbnRlcnByaXNlIFBsdXMKRXhwaXJhdGlvbiBkYXRlPTI4LzAzLzIwMTkKRmlyc3QgbmFtZT1WZWVhbQpMYXN0IG5hbWU9UHJvZHVjdCBTdHJhdGVneQpMaWNlbnNlIGluZm9ybWF0aW9uPUxpY2Vuc2UgdHlwZTpcdE5GUiBMaWNlbnNlXG5MaWNlbnNlZCB0bzpcdFZlZWFtIFNvZnR3YXJlXG5Db250YWN0IHBlcnNvbjpcdFZlZWFtIFByb2R1Y3QgU3RyYXRlZ3lcbkNQVSBzb2NrZXRzICh2U3BoZXJlKTpcdDEwMFxuRWRpdGlvbjogICAgICAgXHRFbnRlcnByaXNlIFBsdXMKTGljZW5zZSB0eXBlPU5GUiBMaWNlbnNlClByb2R1Y3Q9VmVlYW0gQmFja3VwIGFuZCBSZXBsaWNhdGlvbgpTdXBwb3J0IGV4cGlyYXRpb24gZGF0ZT0yOC8wMy8yMDE5ClZlcnNpb249OS54ClNpZ25hdHVyZT1BN0NEQTcyRTkyOENGRjU4Qjg0RDc2RUZGQjA5MTcyRTU1RDNFQzlFNUQwMDk2QkIwOTg5ODMyRUEwNjAxRDdEMTMxM0Y1MzgzRTE4MTcyOEZENUExN0NDOTg2QTE5NkE4RTUyMEVDQzdDQUI1NDYzRjFFQTVFODdDMzY2RDRGODdDQTBCODgwNTQ5OTE4NEFEMDJBRTdCM0Q2NzdFNTU4MjY4QTIxNTc2ODBFNzk1NDI2NzEzNUM3MjdEMjM3N0FBRkUyMUY3RjQ2NUU1NEYxQjJDMTkyMkFDMjA5MzU2NEZGODNBNjA2Rjc1M0JCMERFM0VEQzc5MDlEQTBDMTMwCl1dPjwvTGljZW5zZT48L0xpY2Vuc2VzPg"
+}
 
 
 
