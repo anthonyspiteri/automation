@@ -215,7 +215,14 @@ function Add-Linux-Repo
         {
             $host.ui.RawUI.WindowTitle = "Configuring Veeam SOBR Repository"
 
-            $RepoExtent1 = $config.LinuxRepo.LocalRepoName
+            if($LocalLinuxRepoDeploy)
+            {
+                $RepoExtent1 = $config.LinuxRepo.LocalRepoName
+            }
+        else 
+            {
+                $RepoExtent1 = $config.LinuxRepo.RepoName 
+            }
             
             #Configure Capacity Tier with Amazon S3
             if(!$NoCapacityTier)
