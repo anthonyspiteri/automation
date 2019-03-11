@@ -1,4 +1,4 @@
-﻿# DEPLOY VEEAM SDDC TOOLKIT
+# DEPLOY VEEAM SDDC TOOLKIT
 
 ![alt text](http://anthonyspiteri.net/wp-content/uploads/2019/03/Veeam_SDDC_Deployment_Toolkit_2.png "Overall Solution")
 
@@ -29,7 +29,7 @@ There are four modules
 
 - [Terraform 0.11.8+](https://www.terraform.io/downloads.html)
 - Windows Template with Windows Remote Management enabled and configured for Terraform and up to date VMware Tools
-- Veeam Backup & Replication 9.5 Update 4 Console Installed on remote execution machine
+-  Backup & Replication 9.5 Update 4 Console Installed on remote execution machine
 - vSphere Details and Credentials (Or VMware Cloud on AWS Credentials)
 - Current Veeam License File converted to BASE64 and saved in terraform.tfvars file as license_base64_encoded variable in \veeam_standalone_full directory (Example 30 Day NFR Key embedded)
 
@@ -41,6 +41,7 @@ There are four modules
 - AWS Credentials and pre generated key file for AWS Linux AMIs
 - Amazon S3 Bucket Created
 - Veeam Cloud Connect Provider Credentials
+- Current Veeam License File converted to BASE64 and saved as license.json in \veeam_standalone_full directory
 
 ## Getting Started
 
@@ -67,8 +68,9 @@ There are four modules
 The Terraform templates included in this repository requires Terraform to be available locally on the machine running the templates.  Before you begin, please verify that you have the following information:
 
 1. Download [Terraform](https://www.terraform.io/downloads.html) (minimum tested version 0.11.8) binary to your workstation.
-2. Gather the VMware credentials required to communicate to vCenter and all relevent Cluster, Networking and Storage infomation.
-3. Update the variable values in the newly created `terraform.tfvars` file.
+2. Gather the VMware credentials required to communicate to vCenter
+3. Save a copy of the file `terraform.tfvars.example` as `terraform.tfvars`
+4. Update the variable values in the newly created `terraform.tfvars` file.
 
 ## WinRM Config for Template
     “winrm quickconfig -q

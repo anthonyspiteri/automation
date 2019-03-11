@@ -34,7 +34,11 @@ resource "vsphere_virtual_machine" "vbr_server" {
 
     customize {
       network_interface {
+        ipv4_address = "10.0.30.117"
+        ipv4_netmask = 24
       }
+        ipv4_gateway = "10.0.30.1"
+        dns_server_list = ["10.0.0.2", "1.1.1.1"]
       windows_options {
         computer_name  = "${var.veeam_server_name}"
       }
@@ -83,6 +87,12 @@ resource "null_resource" "bootstrap_vbr_server" {
     user      = "${var.vbr_admin_user}"
     password  = "${var.vbr_admin_password}"
     timeout   = "20m"
+  }
+
+    provisioner "remote-exec" {
+    inline = [
+        "route add -p 10.0.100.0 MASK 255.255.255.0 10.0.30.254"
+    ]
   }
 
   provisioner "file" {
@@ -138,22 +148,17 @@ resource "null_resource" "bootstrap_vbr_server" {
           }
         },
         "run_list": [
-          "recipe[veeam::standalone_complete]",
-          "recipe[veeam::host_mgmt]"
+          "recipe[veeam::standalone_complete]"
         ]
       }
     EOF
     destination = "C:\\tmp\\chef\\dna.json"
   }
-  provisioner "file" {
-    content     = <<-EOF
-      {
-        "id": "license",
-        "license": "${var.license_base64_encoded}"
-      }
-    EOF
-    destination = "C:\\tmp\\chef\\data_bags\\veeam\\license.json"
-  }
+provisioner "file" {
+  source = "license.json"
+  destination = "C:\\tmp\\chef\\data_bags\\veeam\\license.json"
+}
+
   provisioner "file" {
     source      = "${path.module}/scripts/bootstrap.ps1"
     destination = "C:\\tmp\\chef-bootstrap.ps1"

@@ -33,7 +33,7 @@ proxy_template_path    = "same"
 proxy_cpu_count        = 2
 
 # Total amount of memory (MB) to assign to Veeam Proxy Server
-proxy_memory_size_mb   = 8192
+proxy_memory_size_mb   = 4096
 
 # Should the Veeam Proxy Server be registered to the Veeam VBR Server.
 # If false then the proxy server will not register.  This is handy for creating fast launch templates.
@@ -55,7 +55,7 @@ proxy_admin_user       = "USERNAME"
 proxy_admin_password   = "PASSWORD"
 
 # FQDN domain name
-domain_name            = "DOMAIN"
+domain_name            = "aperaturelabs.biz"
 
 # Enter the hostname to give to the Veeam Backup and Replication Server.  Should be less than 16 characters.
 veeam_server_name      = "SDDC-VBR-01"
@@ -70,15 +70,14 @@ proxy_count            = 0
 # Chef Configuration
 
 # Full URL from which the Veeam software will be downloaded.
-veeam_installation_url = "https://download.veeam.com/VeeamBackup&Replication_9.5.4.2615.Update4.iso"
+veeam_installation_url = "https://download.veeam.com/VeeamBackup&Replication_9.5.0.1922.Update3a.iso"
 
 # SHA256 Checksum for the ISO Url selected.
 veeam_installation_checksum = "8a594cec74059f9929ea765ac5e70a49da6fc93803b567cbb9d74fbb1a49a6cc"
 
 # Veeam License File.
 license_base64_encoded = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPExpY2Vuc2VzPjxMaWNlbnNlPjwhW0NEQVRBW0Nsb3VkIENvbm5lY3Q9Tm8KRGVzY3JpcHRpb249Q29weXJpZ2h0IDIwMTkgVmVlYW0sIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC4gVGhlIFNvZnR3YXJlIFByb2R1Y3QgaXMgcHJvdGVjdGVkIGJ5IGNvcHlyaWdodCBhbmQgb3RoZXIgaW50ZWxsZWN0dWFsIHByb3BlcnR5IGxhd3MgYW5kIHRyZWF0aWVzLiBWZWVhbSBvciBpdHMgc3VwcGxpZXJzIG93biB0aGUgdGl0bGUsIGNvcHlyaWdodCwgYW5kIG90aGVyIGludGVsbGVjdHVhbCBwcm9wZXJ0eSByaWdodHMgaW4gdGhlIFNvZnR3YXJlIFByb2R1Y3QuIFZlZWFtIHJlc2VydmVzIGFsbCByaWdodHMgbm90IGV4cHJlc3NseSBncmFudGVkIHRvIHlvdSBpbiBFVUxBLiBUaGUgU29mdHdhcmUgUHJvZHVjdCBpcyBsaWNlbnNlZCwgbm90IHNvbGQuIFZlZWFtIGdyYW50cyB0byB5b3UgYSBub25leGNsdXNpdmUgbm9udHJhbnNmZXJhYmxlIGxpY2Vuc2UgdG8gdXNlIHRoZSBTb2Z0d2FyZSBQcm9kdWN0LCBwcm92aWRlZCB0aGF0IHlvdSBhZ3JlZSB3aXRoIEVVTEEuCkVkaXRpb249RW50ZXJwcmlzZSBQbHVzCkV4cGlyYXRpb24gZGF0ZT0wNy8wNC8yMDE5Ckluc3RhbmNlcz0xMDAwCkxpY2Vuc2UgYWRtaW5pc3RyYXRvciBlLW1haWw9YW50aG9ueS5zcGl0ZXJpQHZlZWFtLmNvbQpMaWNlbnNlIHR5cGU9RXZhbHVhdGlvbgpMaWNlbnNlZSBjb21wYW55PVZlZWFtIFNvZnR3YXJlIC0gQWN0aXZpdGllcyBUcmFja2luZwpMaWNlbnNlZSBlLW1haWw9YW50aG9ueS5zcGl0ZXJpQHZlZWFtLmNvbQpMaWNlbnNlZSBmaXJzdCBuYW1lPVZlZWFtIFNEREMKTGljZW5zZWUgbGFzdCBuYW1lPVRvb2xraXQKTW9uaXRvcmluZz1ZZXMKU3VwcG9ydCBleHBpcmF0aW9uIGRhdGU9MDcvMDQvMjAxOQpTaWduYXR1cmU9NThDQ0FCQkY1RjkxNjdEQUEyODI4N0EwODhCOUM5MTVDMUI5OThCQjEyNTYxNzg1NzEwQjExMzU1MzRFMTk3Mjk4RkM3QTQ2RjgyOENCRTkwQTVFMzA5OUM5M0FBM0E1QTlFMEM3NjYyNjE1MjVGNDcwNjA4MzcyMDQ3NjVFOTg3REQ3M0IxRUIwMjA4Nzk5NEY0NDUxMkExOEJGMEMyNzRCM0M4RTA4Njk1MzhBRjBEMkJDRTkyOEI5RjE0MjQ5QTRBNDI0OUI4QkM5MjRFNkZERjREQkUyREI0RTJDRjc3NkRFMkNBNkM1MkY3M0IxNUVGRDc2RDQyQUExQjc5OApdXT48L0xpY2Vuc2U+PC9MaWNlbnNlcz4="
-
-
+veeam_installation_checksum = "9a6fa7d857396c058b2e65f20968de56f96bc293e0e8fd9f1a848c7d71534134"
 
 
 
