@@ -9,27 +9,55 @@ deploy_veeam_sddc_release.ps1
     Param
     (
         [Parameter(Mandatory=$false,
-                   ValueFromPipelineByPropertyName=$true)]
+        ValueFromPipelineByPropertyName=$true)]
         [Switch]$RunAll,
 
         [Parameter(Mandatory=$false,
-                   ValueFromPipelineByPropertyName=$true)]
+        ValueFromPipelineByPropertyName=$true)]
         [Switch]$RunVBRDeployOnly,
 
         [Parameter(Mandatory=$false,
-                   ValueFromPipelineByPropertyName=$true)]
+        ValueFromPipelineByPropertyName=$true)]
         [Switch]$RunAWSDeploy,
 
         [Parameter(Mandatory=$false,
-                   ValueFromPipelineByPropertyName=$true)]
+        ValueFromPipelineByPropertyName=$true)]
         [Switch]$RunVBRConfigure,
 
         [Parameter(Mandatory=$false,
-        ValueFromPipelineByPropertyName=$true)]
+         ValueFromPipelineByPropertyName=$true)]
         [Switch]$LocalLinuxRepoDeploy,
 
         [Parameter(Mandatory=$false,
-                   ValueFromPipelineByPropertyName=$true)]
+         ValueFromPipelineByPropertyName=$true)]
+        [Switch]$CloudConnectNEA,
+
+        [Parameter(Mandatory=$false,
+         ValueFromPipelineByPropertyName=$true)]
+        [Switch]$NoCloudConnect,
+
+        [Parameter(Mandatory=$false,
+         ValueFromPipelineByPropertyName=$true)]
+        [Switch]$CloudConnectOnly,
+
+        [Parameter(Mandatory=$false,
+         ValueFromPipelineByPropertyName=$true)]
+        [Switch]$NoLinuxRepo,
+
+        [Parameter(Mandatory=$false,
+        ValueFromPipelineByPropertyName=$true)]
+        [Switch]$NoDefaultJobs,
+
+        [Parameter(Mandatory=$false,
+        ValueFromPipelineByPropertyName=$true)]
+        [Switch]$ConfigureSOBR,
+
+        [Parameter(Mandatory=$false,
+        ValueFromPipelineByPropertyName=$true)]
+        [Switch]$NoCapacityTier,
+
+        [Parameter(Mandatory=$false,
+        ValueFromPipelineByPropertyName=$true)]
         [Switch]$ClearVBRConfig
     )
 
@@ -79,8 +107,8 @@ function Run-TerraformChefBuild
         & .\terraform.exe apply -auto-approve
         & .\terraform.exe output -json vbr_host > $config.Default.TFOutputVBR
         #Pause
-        #Write-Host ":: Adding two additional Proxies to Backup & Replication in background" -ForegroundColor Green
-        #invoke-command  -scriptblock {cd $config.Default.ChefPath;.\terraform.exe apply -var proxy_count=2 -auto-approve} -AsJob -computer $env:computername  
+        Write-Host ":: Adding two additional Proxies to Backup & Replication in background" -ForegroundColor Green
+        invoke-command  -scriptblock {cd $config.Default.ChefPath;.\terraform.exe apply -var proxy_count=2 -auto-approve} -AsJob -computer $env:computername  
         Set-Location $wkdir
     }
 
@@ -117,23 +145,23 @@ function Connect-VBR-Server
 function Add-vCenter    
     {
         Write-Host ":: Adding vCenter to Backup & Replication" -ForegroundColor Green
+        Remove-VBRServer $config.VMCCredentials.vCenter -Confirm:$false
         Add-VBRvCenter -Name $config.VMCCredentials.vCenter -User $config.VMCCredentials.Username -Password $config.VMCCredentials.Password -WarningAction SilentlyContinue | Out-Null     
     }
 
-function Add-VCC-Provider 
+    function Add-VCC-Provider 
     {
         $host.ui.RawUI.WindowTitle = "Adding Cloud Connect Service Provider"
         
         #Add Cloud Connect User Account from Service Provider
         Write-Host ":: Adding Cloud Connect Tenant to Stored Credentials" -ForegroundColor Green
-        Add-VBRCredentials -User $config.VCCProvider.CCUserName -Password $config.VCCProvider.CCPassword -Description $config.VCCProvider.CCUserName | Out-Null
+        Add-VBRCloudProviderCredentials -Name $config.VCCProvider.CCUserName -Password $config.VCCProvider.CCPassword -Description $config.VCCProvider.CCUserName
 
         #Set the Cloud Connect User Account credentials
-        $credentials = Get-VBRCredentials -Name $config.VCCProvider.CCUserName
+        $credentials = Get-VBRCloudProviderCredentials -Name $config.VCCProvider.CCUserName
 
         #Add the Cloud Provider into Veeam Backup & Replication
         Write-Host ":: Adding Cloud Connect Service Provider Endpoint and Backup Repository" -ForegroundColor Green
-        #Add-VBRCloudProvider -Address $config.VCCProvider.CCServerAddress -Port $config.VCCProvider.CCPort -VerifyCertificate:$false -Credentials $credentials -Appliance $NEA -Force -WarningAction SilentlyContinue | Out-Null
         Add-VBRCloudProvider -Address $config.VCCProvider.CCServerAddress -Port $config.VCCProvider.CCPort -VerifyCertificate:$false -Credentials $credentials -Force -WarningAction SilentlyContinue | Out-Null
     }
 
@@ -183,34 +211,99 @@ function Add-Linux-Repo
             }
         }
 
+        function Add-SOBR
+        {
+            $host.ui.RawUI.WindowTitle = "Configuring Veeam SOBR Repository"
+
+            $RepoExtent1 = $config.LinuxRepo.LocalRepoName
+            
+            #Configure Capacity Tier with Amazon S3
+            if(!$NoCapacityTier)
+                {
+                    #Add AWS Account Credentials
+                    Add-VBRAmazonAccount -AccessKey $config.SOBRRepo.AWSAccessKey -SecretKey $config.SOBRRepo.AWSSecretKey | Out-Null
+                    
+                    #Set AWS Account Variables
+                    $AWSAccount = Get-VBRAmazonAccount
+                    $AWSConnection = Connect-VBRAmazonS3Service -Account $AWSAccount -RegionType Global -ServiceType CapacityTier
+                    $AWSBucket = Get-VBRAmazonS3Bucket -Connection $AWSConnection -Name $config.SOBRRepo.S3Bucket
+                            
+                    #Create new Amazon S3 Folder
+                    New-VBRAmazonS3Folder -Connection $AWSConnection -Bucket $AWSBucket -Name $config.SOBRRepo.S3Folder | Out-Null
+            
+                    $AWSFolder = Get-VBRAmazonS3Folder -Connection $AWSConnection -Bucket $AWSBucket -Name $config.SOBRRepo.S3Folder
+            
+                    #Add new Amazon S3 backed Object Storage Repository
+                    Add-VBRAmazonS3Repository -Name $config.SOBRRepo.ObjectStorageRepoName -AmazonS3Folder $AWSFolder -Connection $AWSConnection -EnableSizeLimit -SizeLimit $config.SOBRRepo.ObjectStorageRepoLimit | Out-Null
+                }
+    
+            $VBRServer = Get-VBRServer -Name $config.VBRCredentials.VBRServer
+    
+            #Add SOBR with or without Capacity Teir
+            if(!$NoCapacityTier)
+                {
+                    Add-VBRScaleOutBackupRepository -Name $config.SOBRRepo.RepoName -PolicyType DataLocality -Extent $RepoExtent1 -UsePerVMBackupFiles -EnableCapacityTier -ObjectStorageRepository $config.SOBRRepo.ObjectStorageRepoName -OperationalRestorePeriod $config.SOBRRepo.RestoreWindow | Out-Null
+                }
+            else
+                {
+                    Add-VBRScaleOutBackupRepository -Name $config.SOBRRepo.RepoName -PolicyType DataLocality -Extent $RepoExtent1 -UsePerVMBackupFiles | Out-Null
+                }
+        }
+
+function Create-vSphereTags
+
+        {
+            $host.ui.RawUI.WindowTitle = "Creating vCenter Tags"
+    
+            Connect-VIServer -Server $config.VMCCredentials.vCenter -User $config.VMCCredentials.Username -Password $config.VMCCredentials.Password -Force | Out-Null
+            
+            Write-Host ":: Creating VMware Tag Catagories" -ForegroundColor Green
+            New-TagCategory -Name $config.VBRJobDetails.TagCatagory1 -Cardinality "Single" -EntityType "VirtualMachine" -Description "Backup Jobs Policy Tag" | Out-Null
+            New-TagCategory -Name $config.VBRJobDetails.TagCatagory2 -Cardinality "Single" -EntityType "VirtualMachine" -Description "Backup Jobs Policy Tag" | Out-Null
+            
+            Write-Host ":: Creating VMware Tags" -ForegroundColor Green
+            New-Tag -Name $config.VBRJobDetails.Tag1 -Category $config.VBRJobDetails.TagCatagory2 | Out-Null
+            New-Tag -Name $config.VBRJobDetails.Tag2 -Category $config.VBRJobDetails.TagCatagory1 | Out-Null
+            New-Tag -Name $config.VBRJobDetails.Tag3 -Category $config.VBRJobDetails.TagCatagory1 | Out-Null
+        }
+
 function Create-VBRJobs
     {   
         $host.ui.RawUI.WindowTitle = "Creating vCenter Tags and Veeam Backup & Replication Jobs"
-
-        if (!$LocalLinuxRepoDeploy) 
+      
+        if (!$NoLinuxRepo -and !$NoCloudConnect)
             {
-                $LinuxRepoName = $config.LinuxRepo.RepoName
+                $BackupRepo1 = $config.SOBRRepo.RepoName
+                $BackupRepo2 = $config.VCCProvider.CCRepoName
             }
-        else 
+        elseif ($NoLinuxRepo -and !$NoCloudConnect)
             {
-                $LinuxRepoName = $config.LinuxRepo.LocalRepoName    
+                $BackupRepo1 = $config.VBRJobDetails.DefaultRepo1
+                $BackupRepo2 = $config.VCCProvider.CCRepoName  
             }
-        
-        Connect-VIServer -Server $config.VMCCredentials.vCenter -User $config.VMCCredentials.Username -Password $config.VMCCredentials.Password -Force | Out-Null
-        
-        Write-Host ":: Creating VMware Tag Catagories" -ForegroundColor Green
-        New-TagCategory -Name $config.VBRJobDetails.TagCatagory1 -Cardinality "Single" -EntityType "VirtualMachine" -Description "Backup Jobs Policy Tag" | Out-Null
-        New-TagCategory -Name $config.VBRJobDetails.TagCatagory2 -Cardinality "Single" -EntityType "VirtualMachine" -Description "Backup Jobs Policy Tag" | Out-Null
-        
-        Write-Host ":: Creating VMware Tags" -ForegroundColor Green
-        New-Tag -Name $config.VBRJobDetails.Tag1 -Category $config.VBRJobDetails.TagCatagory1 | Out-Null
-        New-Tag -Name $config.VBRJobDetails.Tag2 -Category $config.VBRJobDetails.TagCatagory1 | Out-Null
-        New-Tag -Name $config.VBRJobDetails.Tag3 -Category $config.VBRJobDetails.TagCatagory1 | Out-Null
-        
+        elseif (!$NoLinuxRepo -and $NoCloudConnect)
+            {
+                $BackupRepo1 = $config.SOBRRepo.RepoName
+                $BackupRepo2 = $config.VBRJobDetails.DefaultRepo1 
+            }
+        elseif (!$LocalLinuxRepoDeploy) 
+            {
+                $BackupRepo1 = $config.LinuxRepo.RepoName
+            }    
+        elseif ($LocalLinuxRepoDeploy) 
+            {
+                $BackupRepo1 = $config.SOBRRepo.RepoName
+            }  
+        else
+            {
+                $BackupRepo1 = $config.VBRJobDetails.DefaultRepo1
+                $BackupRepo2 = $config.VBRJobDetails.DefaultRepo1   
+            }
+               
         Write-Host ":: Creating Tag Based Policy Backup Job 1" -ForegroundColor Green
-        Add-VBRViBackupJob -Name $config.VBRJobDetails.Job2 -BackupRepository $LinuxRepoName -Entity (Find-VBRViEntity -Tags -Name $config.VBRJobDetails.Tag2) | Out-Null
+        Add-VBRViBackupJob -Name $config.VBRJobDetails.Job2 -BackupRepository $BackupRepo1 -Entity (Find-VBRViEntity -Tags -Name $config.VBRJobDetails.Tag2) | Out-Null
         Write-Host ":: Creating Tag Based Policy Backup Job 2" -ForegroundColor Green
-        Add-VBRViBackupJob -Name $config.VBRJobDetails.Job3 -BackupRepository $config.VCCProvider.CCRepoName -Entity (Find-VBRViEntity -Tags -Name $config.VBRJobDetails.Tag3) | Out-Null
+        Add-VBRViBackupJob -Name $config.VBRJobDetails.Job3 -BackupRepository $BackupRepo2 -Entity (Find-VBRViEntity -Tags -Name $config.VBRJobDetails.Tag3) | Out-Null
         
         Write-Host ":: Setting Retention Policy Backup Jobs" -ForegroundColor Green
         $JobOptions = Get-VBRJobOptions $config.VBRJobDetails.Job2
@@ -251,8 +344,10 @@ function ClearVBRConfig
         Get-VBRJob -Name $config.VBRJobDetails.Job3 | Remove-VBRJob -Confirm:$false -WarningAction SilentlyContinue | Out-Null
 
         #Clear Linux Repo and Server
+        Get-VBRBackupRepository -ScaleOut -Name $config.SOBRRepo.RepoName | Remove-VBRBackupRepository -Confirm:$false -WarningAction SilentlyContinue | Out-Null
         Get-VBRBackupRepository -Name $config.LinuxRepo.RepoName | Remove-VBRBackupRepository -Confirm:$false -WarningAction SilentlyContinue | Out-Null
         Get-VBRBackupRepository -Name $config.LinuxRepo.LocalRepoName | Remove-VBRBackupRepository -Confirm:$false -WarningAction SilentlyContinue | Out-Null
+        Get-VBRObjectStorageRepository -Name $config.SOBRRepo.ObjectStorageRepoName | Remove-VBRObjectStorageRepository -Confirm:$false -WarningAction SilentlyContinue | Out-Null
         Get-VBRServer -Type Linux -Name $IPAddress.value | Remove-VBRServer -Confirm:$false -WarningAction SilentlyContinue | Out-Null
 
         #Clear Cloud Connect Provider
@@ -263,9 +358,10 @@ function ClearVBRConfig
 
         #Clear Credentials
         Get-VBRCredentials -Name $config.VMCCredentials.Username | Remove-VBRCredentials -Confirm:$false -WarningAction SilentlyContinue | Out-Null
-        Get-VBRCredentials -Name $config.VCCProvider.CCUserName | Remove-VBRCredentials -Confirm:$false -WarningAction SilentlyContinue | Out-Null
+        Get-VBRCloudProviderCredentials -Name $config.VCCProvider.CCUserName | Remove-VBRCloudProviderCredentials -Confirm:$false -WarningAction SilentlyContinue | Out-Null
         Get-VBRCredentials -Name $config.LinuxRepo.Username | Remove-VBRCredentials -Confirm:$false -WarningAction SilentlyContinue | Out-Null
         Get-VBRCredentials | where {$_.Description -eq $config.LinuxRepo.LocalRepoName} | Remove-VBRCredentials -Confirm:$false -WarningAction SilentlyContinue | Out-Null
+        Get-VBRAmazonAccount -AccessKey $config.SOBRRepo.AWSAccesskey | Remove-VBRAmazonAccount -Confirm:$false -WarningAction SilentlyContinue | Out-Null
 
         #Clear vCenter Tags
         get-tag $config.VBRJobDetails.Tag1 | Remove-Tag -Confirm:$false | Out-Null
@@ -340,7 +436,7 @@ if ($RunAll){
     $durationVCC = [math]::Round((New-TimeSpan -Start $StartTimeVCC -End $EndTimeVCC).TotalMinutes,2)
     Write-Host "Execution Time" $durationVCC -ForegroundColor Green -BackgroundColor Black
     Write-Host ""
-    
+
     $StartTimeLR = Get-Date
     Add-Linux-Repo
     Write-Host ""
@@ -348,6 +444,24 @@ if ($RunAll){
     $EndTimeLR = Get-Date
     $durationLR = [math]::Round((New-TimeSpan -Start $StartTimeLR -End $EndTimeLR).TotalMinutes,2)
     Write-Host "Execution Time" $durationLR -ForegroundColor Green -BackgroundColor Black
+    Write-Host ""
+    
+    $StartTimeSR = Get-Date
+    Add-SOBR
+    Write-Host ""
+    Write-Host ":: - Veeam SOBR Repository Configured - ::" -ForegroundColor Green -BackgroundColor Black
+    $EndTimeSR = Get-Date
+    $durationSR = [math]::Round((New-TimeSpan -Start $StartTimeSR -End $EndTimeSR).TotalMinutes,2)
+    Write-Host "Execution Time" $durationLR -ForegroundColor Green -BackgroundColor Black
+    Write-Host ""
+    
+    $StartTimeTG = Get-Date
+    Create-vSphereTags
+    Write-Host ""
+    Write-Host ":: - vSphere Tags Created - ::" -ForegroundColor Green -BackgroundColor Black
+    $EndTimeTG = Get-Date
+    $durationTG = [math]::Round((New-TimeSpan -Start $StartTimeTG -End $EndTimeTG).TotalMinutes,2)
+    Write-Host "Execution Time" $durationTG -ForegroundColor Green -BackgroundColor Black
     Write-Host ""
     
     $StartTimeJB = Get-Date
@@ -420,32 +534,62 @@ if ($RunVBRConfigure){
     Write-Host "Execution Time" $durationVC -ForegroundColor Green -BackgroundColor Black
     Write-Host ""
     
-    $StartTimeVCC = Get-Date
-    Add-VCC-Provider
-    Write-Host ""
-    Write-Host ":: - Veeam Cloud Connect Service Provider Configured - ::" -ForegroundColor Green -BackgroundColor Black
-    $EndTimeVCC = Get-Date
-    $durationVCC = [math]::Round((New-TimeSpan -Start $StartTimeVCC -End $EndTimeVCC).TotalMinutes,2)
-    Write-Host "Execution Time" $durationVCC -ForegroundColor Green -BackgroundColor Black
-    Write-Host ""
-      
-    $StartTimeLR = Get-Date
-    Add-Linux-Repo
-    Write-Host ""
-    Write-Host ":: - Veeam Linux Repository Configured - ::" -ForegroundColor Green -BackgroundColor Black
-    $EndTimeLR = Get-Date
-    $durationLR = [math]::Round((New-TimeSpan -Start $StartTimeLR -End $EndTimeLR).TotalMinutes,2)
-    Write-Host "Execution Time" $durationLR -ForegroundColor Green -BackgroundColor Black
-    Write-Host ""
+    if (!$NoCloudConnect)
+        {
+            $StartTimeVCC = Get-Date
+            Add-VCC-Provider
+            Write-Host ""
+            Write-Host ":: - Veeam Cloud Connect Service Provider Configured - ::" -ForegroundColor Green -BackgroundColor Black
+            $EndTimeVCC = Get-Date
+            $durationVCC = [math]::Round((New-TimeSpan -Start $StartTimeVCC -End $EndTimeVCC).TotalMinutes,2)
+            Write-Host "Execution Time" $durationVCC -ForegroundColor Green -BackgroundColor Black
+            Write-Host ""
+        }
     
-    $StartTimeJB = Get-Date
-    Create-VBRJobs
-    Write-Host ""
-    Write-Host ":: - Backup Jobs Configured - ::" -ForegroundColor Green -BackgroundColor Black
-    $EndTimeJB = Get-Date
-    $durationJB = [math]::Round((New-TimeSpan -Start $StartTimeJB -End $EndTimeJB).TotalMinutes,2)
-    Write-Host "Execution Time" $durationJB -ForegroundColor Green -BackgroundColor Black
-    Write-Host ""
+    if (!$NoLinuxRepo)
+        {  
+            $StartTimeLR = Get-Date
+            Add-Linux-Repo
+            Write-Host ""
+            Write-Host ":: - Veeam Linux Repository Configured - ::" -ForegroundColor Green -BackgroundColor Black
+            $EndTimeLR = Get-Date
+            $durationLR = [math]::Round((New-TimeSpan -Start $StartTimeLR -End $EndTimeLR).TotalMinutes,2)
+            Write-Host "Execution Time" $durationLR -ForegroundColor Green -BackgroundColor Black
+            Write-Host ""
+        }
+
+    if ($ConfigureSOBR)
+        {
+            $StartTimeSR = Get-Date
+            Add-SOBR
+            Write-Host ""
+            Write-Host ":: - Veeam SOBR Repository Configured - ::" -ForegroundColor Green -BackgroundColor Black
+            $EndTimeSR = Get-Date
+            $durationSR = [math]::Round((New-TimeSpan -Start $StartTimeSR -End $EndTimeSR).TotalMinutes,2)
+            Write-Host "Execution Time" $durationLR -ForegroundColor Green -BackgroundColor Black
+            Write-Host ""
+        }  
+
+    if(!$NoDefaultJobs)
+        {
+            $StartTimeTG = Get-Date
+            Create-vSphereTags
+            Write-Host ""
+            Write-Host ":: - vSphere Tags Created - ::" -ForegroundColor Green -BackgroundColor Black
+            $EndTimeTG = Get-Date
+            $durationTG = [math]::Round((New-TimeSpan -Start $StartTimeTG -End $EndTimeTG).TotalMinutes,2)
+            Write-Host "Execution Time" $durationTG -ForegroundColor Green -BackgroundColor Black
+            Write-Host ""
+            
+            $StartTimeJB = Get-Date
+            Create-VBRJobs
+            Write-Host ""
+            Write-Host ":: - Backup Jobs Configured - ::" -ForegroundColor Green -BackgroundColor Black
+            $EndTimeJB = Get-Date
+            $durationJB = [math]::Round((New-TimeSpan -Start $StartTimeJB -End $EndTimeJB).TotalMinutes,2)
+            Write-Host "Execution Time" $durationJB -ForegroundColor Green -BackgroundColor Black
+            Write-Host ""
+        }
 }
 
 if ($ClearVBRConfig){
