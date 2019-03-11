@@ -7,6 +7,18 @@
             "LinuxRepoBuildPath":"C:\\Users\\anthonyspiteri\\Documents\\automation\\deploy_veeam_sddc_toolkit\\veeam_linux_repo\\",
             "LinuxRepoIP":"C:\\Users\\anthonyspiteri\\Documents\\automation\\deploy_veeam_sddc_toolkit\\ip.json"
         },
+    "SOBRRepo": {
+            "AWSAccesskey":"",
+            "AWSSecretkey":"",
+            "S3Folder": "ct03new",
+            "S3Bucket":"veeam-ps-ct03",
+            "ObjectStorageRepoName":"AWS-CT-03",
+            "ObjectStorageRepoLimit":"1024000",
+            "RepoName":"SOBR-01",
+            "RepoExtent1":"",
+            "RepoPath1":"",
+            "RestoreWindow":"30"
+        },
     "LinuxRepo": {
             "VBRServer":"localhost",
             "IpAddress":"",
