@@ -16,10 +16,13 @@ There are four modules
 - Deploy and Configure local Veeam Linux Repo
 - Configure Veeam Backup & Replication 9.5 Update 4 using PowerShell and PowerCLI
 
-## Version 1.2
+#### Version 1.2
 > Added support for Update 4 PowerShell command to mananage new Cloud Credentials
+
 > Added Scale Out Backup Repository Support with option for Capacity Tier
+
 > Merged BR-Condigure-Veeam code into main PowerShell and config.json (https://github.com/anthonyspiteri/powershell/tree/master/BR-Configure-Veeam)
+
 > Added better logic for processing Backup Repository selection for Default Job Creation
 
 ## Requirements
