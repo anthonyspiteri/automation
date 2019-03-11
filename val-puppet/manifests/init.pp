@@ -1,6 +1,7 @@
 # === Class veeam_val
 #
 # = Parameters
+#   epel_manage   => Add epel repo (true,false)            (DEFAULT: true)
 #   pkg_ensure    => Present, latest or absent             (DEFAULT: present)
 #
 #	target		  => Local, NFS, SMB, vbrserver            (DEFAULT: none)
@@ -21,12 +22,16 @@
 #   username      => Login for target authentication       (DEFAULT: none)
 #   password      => Password for target authentication    (DEFAULT: none)
 #
-#	type	   	  => File, volume or entire                (DEFAULT: none)
-#   jobname       => Job name                              (DEFAULT: none)
-# 	blocksize     => 256|512|1024|4096                     (DEFAULT: 4096)
-#	compression   => 0 ... 4                               (DEFAULT: 1)
-#	objects       => Objects to backup comma seperated	   (DEFAULT: none)
-#	points        => Number of restore points to keep      (DEFAULT: 7)
+#	type         => File, volume or entire                (DEFAULT: none)
+#   jobname    => Job name                              (DEFAULT: none)
+# 	blocksize  => 256|512|1024|4096                     (DEFAULT: 4096)
+#	compression  => 0 ... 4                               (DEFAULT: 1)
+#	objects      => Objects to backup comma seperated	   (DEFAULT: none)
+# includedirs => Files to back up comma separated   (DEFAULT: none)
+# excludedirs => Files to exclude from backup back up comma separated   (DEFAULT: none)
+# includemasks => File masks to back up comma separated   (DEFAULT: none)
+# excludemasks => File masks to exclude from backup comma separated   (DEFAULT: none)
+#	points       => Number of restore points to keep      (DEFAULT: 7)
 #
 #   postjob  	  => Postjob script path                   (DEFAULT: none)
 #   prejob        => Prejob script path                    (DEFAULT: none)
@@ -73,6 +78,8 @@
 # Niels Engelen (niels@foonet.be)
 #
 class veeam_val (
+  $epel_manage    = $::veeam_val::params::epel_manage,
+
   $pkg_ensure     = $::veeam_val::params::pkg_ensure,
   $pkg_name       = $::veeam_val::params::pkg_name,
 
@@ -104,6 +111,10 @@ class veeam_val (
   $blocksize      = $::veeam_val::params::blocksize,
   $points         = $::veeam_val::params::points,
   $objects        = $::veeam_val::params::objects,
+  $includedirs    = $::veeam_val::params::includedirs,
+  $excludedirs    = $::veeam_val::params::excludedirs,
+  $includemasks   = $::veeam_val::params::includemasks,
+  $excludemasks   = $::veeam_val::params::excludemasks,
 
   $postjob        = $::veeam_val::params::postjob,
   $prejob         = $::veeam_val::params::prejob,

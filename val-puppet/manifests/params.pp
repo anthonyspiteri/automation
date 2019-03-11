@@ -6,6 +6,7 @@
 #
 class veeam_val::params {
   # Define all default parameters
+  $epel_manage    = true
   $pkg_ensure     = 'present'
   $pkg_name       = 'veeam'
 
@@ -36,6 +37,10 @@ class veeam_val::params {
   $blocksize      = 4096
   $compression    = 1
   $objects        = '/dev/sda'
+  $includedirs    = ''
+  $excludedirs    = ''
+  $includemasks   = ''
+  $excludemasks   = ''
   $points         = 7
 
   $postjob        = ''
