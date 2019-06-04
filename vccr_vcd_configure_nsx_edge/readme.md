@@ -24,7 +24,7 @@ Pre-Requisites: There are a few requirements and pre-requisites that need to be 
 
 Variables: There are some variables that can be adjustment or need specifying.
 
-* All variables are in the terraform.tfvars file
+## All variables are in the terraform.tfvars file
 
   vcd_user = "apiuser"
   vcd_pass = "password"
