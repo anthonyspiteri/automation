@@ -24,7 +24,7 @@ Pre-Requisites: There are a few requirements and pre-requisites that need to be 
 
 Variables: There are some variables that can be adjustment or need specifying.
 
-* All variables are in the terraform.tfvars file
+All variables are in the terraform.tfvars file
 
     vcd_user = "apiuser"
     vcd_pass = "password"
@@ -35,16 +35,6 @@ Variables: There are some variables that can be adjustment or need specifying.
     vcd_external_ip="NSX Edge External IP"
     vcd_vm_1="Replica VM IP"
     vcd_vorg_network="vORG Network subnet and mask"
-    
-	vcd_user = "apiuser"
-	vcd_pass = "password"
-	vcd_org = "Org_cloud2893"
-	vcd_url = "https://mycloud.per.zettagrid.com/api"
-	vcd_vdc = "DC_1131846"
-	vcd_edge ="DC_1131846"
-	vcd_external_ip="119.252.90.164"
-	vcd_vm_1="172.17.0.240"
-	vcd_vorg_network="172.17.0.0/24"
 
 * In the run_vCD_VCCR_NSX_Edge_Powershell_.bat file, which is what is executed by the Veeam Replication Job the path to the configure_vCD_VCCR_NSX_Edge.ps1 needs to be modified to it's full location
 
