@@ -8,6 +8,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Author: Anthony Spiteri
 
+https://wp.me/p2olVJ-2fF
+
 Description: Post Script that can be run after completion of Veeam vCloud Director Cloud Connect Replication Job that automatically configures the NSX Edge to allow external network connectivity for replicas in the case of full failover.
 
 Function: Using the Terraform vCloud Director Provider to automate NAT and Firewall rules for specific subnets and VM IP addresses for service access. Code can easily be expanded for configuration of additional Replica VMs and networking configuration.
