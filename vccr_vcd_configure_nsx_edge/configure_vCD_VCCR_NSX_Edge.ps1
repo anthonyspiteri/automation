@@ -10,7 +10,6 @@ function Run-Terraform
         & .\terraform.exe init
         & .\terraform.exe init -upgrade
         & .\terraform.exe apply -auto-approve
-        #& .\terraform.exe output -json private_ip_VeeamRepo > $config.Default.LinuxRepoIP
     }
 
 Run-Terraform
