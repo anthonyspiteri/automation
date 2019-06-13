@@ -36,8 +36,10 @@ All variables are in the terraform.tfvars file
     vcd_vm_1="Replica VM IP"
     vcd_vorg_network="vORG Network subnet and mask"
 
-* In the run_vCD_VCCR_NSX_Edge_Powershell_.bat file, which is what is executed by the Veeam Replication Job the path to the configure_vCD_VCCR_NSX_Edge.ps1 needs to be modified to it's full location
+Usage: 
 
-Usage: ./terraform plan|apply|destory
+Select ps1 script from Advanced Job settings in Veeam Replication Job: https://wp.me/p2olVJ-2fF
+
+./terraform plan|apply|destory
 
 eg. echo yes | ./terraform apply
