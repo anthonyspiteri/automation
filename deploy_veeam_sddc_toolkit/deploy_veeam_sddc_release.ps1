@@ -108,7 +108,7 @@ function Run-TerraformChefBuild
         & .\terraform.exe output -json vbr_host > $config.Default.TFOutputVBR
         #Pause
         Write-Host ":: Adding two additional Proxies to Backup & Replication in background" -ForegroundColor Green
-        invoke-command  -scriptblock {cd $config.Default.ChefPath;.\terraform.exe apply -var proxy_count=2 -auto-approve} -AsJob -computer $env:computername  
+        invoke-command  -scriptblock {cd $config.Default.ChefPath;.\terraform.exe apply -var proxy_count=2 --auto-approve} -AsJob -computer $env:computername  
         Set-Location $wkdir
     }
 
